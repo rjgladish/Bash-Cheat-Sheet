@@ -6,41 +6,95 @@
 
 ```bash
 !!            # Run the last command
-
+^x^y          # Revise  the last command, changw x to y
 touch foo.sh
 chmod +x !$   # !$ is the last argument of the last command i.e. foo.sh
+```
+
+#### For Loops
+
+```bash
+#!/bin/bash
+
+for i in {0..10..2};  do
+    echo "Index: $i"
+done
+
+for filename in file1 file2 file3 ;  do
+    echo "Content: " >> $filename
+done
+
+for filename in *;  do
+    echo "Content: " >> $filename
+done
+```
+#### If Statements
+
+```bash
+#!/bin/bash
+
+if $foo = 'bar'; then
+  echo 'one'
+elif [[$foo = 'bar']] || [[$foo = 'baz']]; then
+  echo 'two'
+else
+  echo 'four'
+fi
+```
+
+#### Inline If Statements
+
+```bash
+
+[[ $USER = 'root' ]] && echo 'superman' || echo 'average joe'
+```
+
+#### While Loops
+
+```bash
+#!/bin/bash
+
+declare -i counter
+counter=10
+while [$counter -gt 2]; do
+  echo The counter is $counter
+  counter=counter-1
+done
+
+cat $gilename | while read $line ; do
+    echo $line | wc -l
+done
+```
+
+#### Case Statements
+
+```bash
+case $weather in
+  sunny|warm) echo "Nice weather: " $weather
+  ;;
+  * ) echo "Don't understand"
+  ;;
+esac
 ```
 
 ## Navigating Directories
 
 ```bash
-pwd                       # Print current directory path
-ls                        # List directories
-ls -a|--all               # List directories including hidden
-ls -l                     # List directories in long form
-ls -l -h|--human-readable # List directories in long form with human readable sizes
-ls -t                     # List directories by modification time, newest first
+
 stat foo.txt              # List size, created and modified timestamps for a file
 stat foo                  # List size, created and modified timestamps for a directory
 tree                      # List directory and file tree
 tree -a                   # List directory and file tree including hidden
 tree -d                   # List directory tree
-cd foo                    # Go to foo sub-directory
-cd                        # Go to home directory
-cd ~                      # Go to home directory
 cd -                      # Go to last directory
-pushd foo                 # Go to foo sub-directory and add previous directory to stack
-popd                      # Go back to directory in stack saved by `pushd`
 ```
 
 ## Creating Directories
 
 ```bash
-mkdir foo                        # Create a directory
-mkdir foo bar                    # Create multiple directories
+
 mkdir -p|--parents foo/bar       # Create nested directory
 mkdir -p|--parents {foo,bar}/baz # Create multiple nested directories
-
 mktemp -d|--directory            # Create a temporary directory
 ```
 
@@ -56,87 +110,35 @@ rsync -avz /foo username@hostname:/bar                  # Copy local directory t
 rsync -avz username@hostname:/foo /bar                  # Copy remote directory to local directory
 ```
 
-## Deleting Directories
-
-```bash
-rmdir foo                        # Delete empty directory
-rm -r|--recursive foo            # Delete directory including contents
-rm -r|--recursive -f|--force foo # Delete directory including contents, ignore nonexistent files and never prompt
-```
-
 ## Creating Files
 
 ```bash
-touch foo.txt          # Create file or update existing files modified timestamp
-touch foo.txt bar.txt  # Create multiple files
 touch {foo,bar}.txt    # Create multiple files
 touch test{1..3}       # Create test1, test2 and test3 files
 touch test{a..c}       # Create testa, testb and testc files
-
+touch -d $(date )      # change file modification date to "dae string'
 mktemp                 # Create a temporary file
 ```
 
 ## Standard Output, Standard Error and Standard Input
 
 ```bash
-echo "foo" > bar.txt       # Overwrite file with content
-echo "foo" >> bar.txt      # Append to file with content
-
 ls exists 1> stdout.txt    # Redirect the standard output to a file
 ls noexist 2> stderror.txt # Redirect the standard error output to a file
 ls 2>&1 out.txt            # Redirect standard output and error to a file
-ls > /dev/null             # Discard standard output and error
 
 read foo                   # Read from standard input and write to the variable foo
 ```
 
-## Moving Files
+## rsync Files
 
 ```bash
-cp foo.txt bar.txt                                # Copy file
-mv foo.txt bar.txt                                # Move file
-
 rsync -z|--compress -v|--verbose /foo.txt /bar    # Copy file quickly if not changed
 rsync z|--compress -v|--verbose /foo.txt /bar.txt # Copy and rename file quickly if not changed
 ```
 
-## Deleting Files
-
-```bash
-rm foo.txt            # Delete file
-rm -f|--force foo.txt # Delete file, ignore nonexistent files and never prompt
-```
-
-## Reading Files
-
-```bash
-cat foo.txt            # Print all contents
-less foo.txt           # Print some contents at a time (g - go to top of file, SHIFT+g, go to bottom of file, /foo to search for 'foo')
-head foo.txt           # Print top 10 lines of file
-tail foo.txt           # Print bottom 10 lines of file
-open foo.txt           # Open file in the default editor
-wc foo.txt             # List number of lines words and characters in the file
-```
-
 ## File Permissions
 
-| # | Permission              | rwx | Binary |
-| - | -                       | -   | -      |
-| 7 | read, write and execute | rwx | 111    |
-| 6 | read and write          | rw- | 110    |
-| 5 | read and execute        | r-x | 101    |
-| 4 | read only               | r-- | 100    |
-| 3 | write and execute       | -wx | 011    |
-| 2 | write only              | -w- | 010    |
-| 1 | execute only            | --x | 001    |
-| 0 | none                    | --- | 000    |
-
-For a directory, execute means you can enter a directory.
-
-| User | Group | Others | Description                                                                                          |
-| -    | -     | -      | -                                                                                                    |
-| 6    | 4     | 4      | User can read and write, everyone else can read (Default file permissions)                           |
-| 7    | 5     | 5      | User can read, write and execute, everyone else can read and execute (Default directory permissions) |
 
 - u - User
 - g - Group
@@ -166,18 +168,14 @@ whereis wget                               # Find the binary, source, and manual
 ```
 
 `locate` uses an index and is fast.
-
+`find` doesn't use an index and is slow.
 ```bash
 updatedb                                   # Update the index
 
 locate foo.txt                             # Find a file
 locate --ignore-case                       # Find a file and ignore case
 locate f*.txt                              # Find a text file starting with 'f'
-```
 
-`find` doesn't use an index and is slow.
-
-```bash
 find /path -name foo.txt                   # Find a file
 find /path -iname foo.txt                  # Find a file with case insensitive search
 find /path -name "*.txt"                   # Find all text files
@@ -614,80 +612,3 @@ echo $?  # Print the last exit code
 - `<` - Is less than in ASCII alphabetical order
 - `>` - Is greater than in ASCII alphabetical order
 
-#### If Statements
-
-```bash
-#!/bin/bash
-
-if [[$foo = 'bar']]; then
-  echo 'one'
-elif [[$foo = 'bar']] || [[$foo = 'baz']]; then
-  echo 'two'
-elif [[$foo = 'ban']] && [[$USER = 'bat']]; then
-  echo 'three'
-else
-  echo 'four'
-fi
-```
-
-#### Inline If Statements
-
-```bash
-#!/bin/bash
-
-[[ $USER = 'rehan' ]] && echo 'yes' || echo 'no'
-```
-
-#### While Loops
-
-```bash
-#!/bin/bash
-
-declare -i counter
-counter=10
-while [$counter -gt 2]; do
-  echo The counter is $counter
-  counter=counter-1
-done
-```
-
-#### For Loops
-
-```bash
-#!/bin/bash
-
-for i in {0..10..2}
-  do
-    echo "Index: $i"
-  done
-
-for filename in file1 file2 file3
-  do
-    echo "Content: " >> $filename
-  done
-
-for filename in *;
-  do
-    echo "Content: " >> $filename
-  done
-```
-
-#### Case Statements
-
-```bash
-#!/bin/bash
-
-echo "What's the weather like tomorrow?"
-read weather
-
-case $weather in
-  sunny | warm ) echo "Nice weather: " $weather
-  ;;
-  cloudy | cool ) echo "Not bad weather: " $weather
-  ;;
-  rainy | cold ) echo "Terrible weather: " $weather
-  ;;
-  * ) echo "Don't understand"
-  ;;
-esac
-```
